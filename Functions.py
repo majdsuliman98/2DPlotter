@@ -29,7 +29,8 @@ def openCamera():
 
 
 def img2bmp(imagepth,filename):
-    Image.open(imagepth).save("./PBM images/{}.bmp".format(filename))
+  
+   Image.open(imagepth).save("./PBM images/{}.bmp".format(filename))
    # doc = aw.Document()
    # builder = aw.DocumentBuilder(doc)
 

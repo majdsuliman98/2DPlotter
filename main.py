@@ -14,7 +14,7 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-
+from read_gcode import *
 from main_screen import Ui_MainWindow
 Filename = ''
 class UI:
@@ -30,6 +30,7 @@ class UI:
         self.ui.picture_btn.clicked.connect(self.openPicture)
         self.ui.capture_btn.clicked.connect(self.takePicture)
         # self.ui.label_5.hide()
+        
         self.ui.draw_btn.clicked.connect(self.Draw)
         self.ui.back_btn.clicked.connect(self.Cancel)
         self.ui.back_btn1.clicked.connect(self.Cancel)
@@ -41,6 +42,15 @@ class UI:
         self.ui.horizontalSlider.setTickPosition(QSlider.TicksBelow)
         self.ui.label_thresh.setText(str(float(self.ui.horizontalSlider.value())/100))
 
+
+        self.page_4 = QWidget()
+        self.page_4.setObjectName("page_4")
+        self.img_loading = QLabel(self.page_4)
+        self.img_loading.setGeometry(QRect(250, 40, 201, 221))
+        self.gif = QtGui.QPixmap('loading.gif')
+        self.img_loading.setPixmap(self.gif)
+        self.ui.stackedWidget.addWidget(self.page_4)
+
         self.Main.setWindowFlags(Qt.FramelessWindowHint)
         self.Main.show()
         self.ui.horizontalSlider.valueChanged.connect(self.valuechanged)
@@ -49,7 +59,7 @@ class UI:
         self.capture = QCameraImageCapture(self.camera)
 
         self.movie = QMovie('loading.gif')
-        # self.ui.label_5.setMovie(self.movie)
+        self.img_loading.setMovie(self.movie)
 
     def Quit(self):
         sys.exit()
@@ -60,17 +70,16 @@ class UI:
         self.movie.stop()
         
         self.displayImage(self.imgpth,self.img_name)
-        self.ui.label_5.hide()
-        self.ui.stackedWidget1.setCurrentIndex(0)
+        # self.ui.label_5.hide()
         self.ui.stackedWidget.setCurrentIndex(1)
-        self.ui.stackedWidget.setGeometry(QRect(0, 320, 671, 191))
-        self.ui.stackedWidget1.setGeometry(QRect(-1, 0, 671, 311))
+        
 
     def displayImage(self,imagepth,filename):
         threshold = float(self.ui.label_thresh.text())
+
         pixmap = QtGui.QPixmap(imagepth)
-        pixmap_scaled = pixmap.scaled(291,221,Qtcore.Qt.KeepAspectRatio)
-        self.ui.img_choosen.setPixmap(QtGui.QPixmap(imagepth))
+        self.ui.img_choosen.setPixmap(pixmap)
+
         img2bmp(imagepth,filename)
         CovertToPBM(threshold,filename)
     
@@ -126,6 +135,10 @@ class UI:
             ConvertToSVG(self.Filename)
             FixSvgHeader(self.Filename)
             ConvertToGCode(self.Filename)
+
+            parser = Gcode()
+            parser.read_gcode(self.Filename)
+            parser.startDrawing()
     
     def openPicture(self):
         
@@ -159,15 +172,17 @@ class UI:
 
         
         timestamp = time.strftime("%d-%b-%Y-%H_%M_%S")
-        self.imgpth = "/home/pi/Desktop/2d printer/images_taken/{}.jpg".format(timestamp)
+        self.imgpth = "/home/pi/Desktop/New interface/2d plotter/images_taken/{}.jpg".format(timestamp)
         self.capture.capture(self.imgpth)
         self.img_name = timestamp
-        self.ui.viewfinder.hide()
-        self.ui.capture_btn.hide()
+        # self.ui.viewfinder.hide()
+        # self.ui.capture_btn.hide()
+        
         # self.ui.label_5.show()
         self.Filename = self.img_name
-        
+        self.ui.stackedWidget.setCurrentIndex(3)
         self.startAnimation()
+        
         timer = QTimer()
         timer.singleShot(3000,self.stopAnimation)
         
