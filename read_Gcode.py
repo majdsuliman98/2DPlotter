@@ -1,62 +1,51 @@
 
-class printer:
-    #Steps per revolution 
-    StepM = 44
+from dataclasses import dataclass
 
-    #Limits 
-    Xmin = 0
-    Xmax = 40
-    Ymin = 0 
-    Ymax = 40
-    Zmin = 0 
-    Zmax = 1
+@dataclass
+class Coordinates:
+    x:float
+    y:float
+    z:float
 
-    #Steps per millimeter 
-    StepX = 100
-    StepY = 100
-
-    #Initial position 
-    Xpos = Xmin
-    Ypos = Ymin
-    Zpos = Zmin
+class plotter:
+    gcodelines = []
+    
 
     def read_gcode(self,filename):
         with open('Gcodes/{}.gcode'.format(filename)) as gcode:
             lines = gcode.readlines()
-        self.gcodelines = lines
-
-    def processGcode(self):
-       command = self.gcodelines
-       for i in range(len(command)):
-            self.l = command[i].split(" ")
-            self.currentindex = i
-            self.sendCommand()
-    
+            self.gcodelines = lines
+        
+  
+    def parse_gcode(self):
+        self.coordinates = []
+        for line in self.gcodelines:
+                line = line.strip()
+                if line.startswith("G1") and line[2:].strip():
+                    values = line[2:].split()
+                    x = float([value[1:] for value in values if value[0] == 'X'][0])
+                    y = float([value[1:] for value in values if value[0] == 'Y'][0])
+                    z = float([value[1:] for value in values if value[0] == 'Z'][0])
+                    self.coordinates.append((x, y, z))
+                    self.point = Coordinates(x,y,z)
+                    self.sendCommand()
+        
     def sendCommand(self):
+            print("Sending command to stepper motors")
+            print("moving to point X = {} Y = {} Z = {}".format(self.point.x,self.point.y,self.point.z))
+
        
-        if(self.l[0] == "G1"):
-            print("Sending command to stepper motors {}".format(self.l[0]))
-            print("moving to point {}, {}".format(self.l[1],self.l[2]))
-
-        elif(self.l[0] == "G4"):
-            print("Sending command to stepper motors {}".format(self.l[0]))
-            print("dwelling for {} millisecond".format(self.l[1]))
-
-        elif(self.l[0] == "M300"):
-            print("Sending command to stepper motors {}".format(self.l[0]))
-            if(self.l[1] == "S1.00"):
-                print("pen is going up")   
-            else:
-                print("pen is going down")
-        else:
-            print("headline")
 
 
         
 
-p = printer()
-p.read_gcode("1")
-p.processGcode()
+p = plotter()
+p.read_gcode("cam")
+p.parse_gcode()
+
+
+# print(coordinates)
+
 
 # Testing new functions
  

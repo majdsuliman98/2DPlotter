@@ -69,6 +69,7 @@ class UI:
     def displayImage(self,imagepth,filename):
         threshold = float(self.ui.label_thresh.text())
         pixmap = QtGui.QPixmap(imagepth)
+        pixmap_scaled = pixmap.scaled(291,221,Qtcore.Qt.KeepAspectRatio)
         self.ui.img_choosen.setPixmap(QtGui.QPixmap(imagepth))
         img2bmp(imagepth,filename)
         CovertToPBM(threshold,filename)
