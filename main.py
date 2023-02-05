@@ -76,12 +76,12 @@ class UI:
 
     def displayImage(self,imagepth,filename):
         threshold = float(self.ui.label_thresh.text())
-
-        pixmap = QtGui.QPixmap(imagepth)
-        self.ui.img_choosen.setPixmap(pixmap)
-
+        
         img2bmp(imagepth,filename)
         CovertToPBM(threshold,filename)
+
+        pixmap = QtGui.QPixmap('./PBM images/'+filename+'.bmp')
+        self.ui.img_choosen.setPixmap(pixmap)
     
         pixmap1 = QtGui.QPixmap('./PBM images/'+filename+'.pbm')
         self.ui.filtered_image.setPixmap(pixmap1)
